@@ -82,14 +82,27 @@ angular.module('ngDfp', [])
       googletag.cmd.push(function() {
         angular.forEach(slots, function (slot, id) {
           definedSlots[id] = googletag.defineSlot.apply(null, slot).addService(googletag.pubads());
+          
+
           if(sizeMapping[id]){
-            definedSlots[id].defineSizeMapping(sizeMapping[id]);
+
+            var sm = sizeMapping[id];
+
+            var mapping = googletag.sizeMapping();
+
+            angular.forEach(sm, function(value){
+              mapping.addSize(value[0], value[1]);
+            });
+
+            mapping = mapping.build()
+
+            definedSlots[id].defineSizeMapping(mapping).addService(googletag.pubads());
           }
 
           /**
            If sent, set the slot specific targeting
            */
-	  var slotTargeting = slot.getSlotTargeting();
+        var slotTargeting = slot.getSlotTargeting();
           if(slotTargeting){
             angular.forEach(slotTargeting, function (value, key) {
               definedSlots[id].setTargeting(value.id, value.value);
@@ -97,7 +110,7 @@ angular.module('ngDfp', [])
           }
         });
 
-	      /**
+        /**
          Set the page targeting key->values
          */
         angular.forEach(pageTargeting, function (value, key) {
@@ -112,6 +125,7 @@ angular.module('ngDfp', [])
         }
 
         googletag.pubads().enableSingleRequest();
+
         googletag.enableServices();
 
         googletag.pubads().addEventListener('slotRenderEnded', self._slotRenderEnded);
